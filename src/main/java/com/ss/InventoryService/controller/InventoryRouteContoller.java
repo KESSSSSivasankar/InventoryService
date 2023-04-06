@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ss.InventoryService.broker.JMSProducer;
 import com.ss.InventoryService.entity.Inventory;
 import com.ss.InventoryService.exceptions.InventoryNotFoundException;
 import com.ss.InventoryService.service.InventoryRouteService;
@@ -26,6 +27,16 @@ public class InventoryRouteContoller {
 	@Autowired  
 	InventoryRouteService inventoryRouteService;
 	
+	
+	@Autowired
+    JMSProducer jmsProducer;
+
+    @PostMapping(value="/jms/inventory")
+    public Inventory sendMessage(@PathVariable("inventoryid") long busroutesid){
+        Inventory availableSeats = inventoryRouteService.fetchBusInventory(busroutesid);
+    	jmsProducer.sendMessage(availableSeats);
+        return availableSeats;
+    }
 	
 	@GetMapping("/inventory")  
 	private ResponseEntity<List<Inventory>> getAllBusRoutes() throws InventoryNotFoundException 
